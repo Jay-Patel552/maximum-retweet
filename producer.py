@@ -6,7 +6,7 @@ auth.set_access_token(k.Access_token,k.Access_token_secret)
 
 api=tweepy.API(auth)
 i=0
-public_tweets=api.home_timeline(tweet_mode='extended')
+public_tweets=api.get_streams(tweet_mode='extended')
 some_user=api.get_user('@elonmusk')
 print(some_user.screen_name)
 print(some_user.followers_count)

@@ -1,0 +1,7 @@
+set header for bearer token
+get rules 
+delete rules 
+set rules 
+connect to stream
+
+
