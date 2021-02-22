@@ -36,10 +36,7 @@ def refine_rules(header,req_rules):
         current_rules=requests.get("https://api.twitter.com/2/tweets/search/stream/rules",headers=header)
         print(json.dumps(current_rules.json())) #json.dumps----->python object to json. Serialize obj as a JSON formatted stream to fp (a .write()-supporting file-like object) using this conversion table.
 
-def twit_stream(req_rules):
-    global connection_established
-    # global stop_stream
-    print('1')
+def twit_stream(req_rules,temp_ls,batch_size):
     bearer_token=os.environ.get("BEARER_TOKEN")
     bearer_str="Bearer "+str(bearer_token)
     header={"Authorization":bearer_str}
@@ -49,15 +46,18 @@ def twit_stream(req_rules):
     #params={'tweet.fields':'created_at','tweet.fields':'referenced_tweets','tweet':'retweet_count'}
     response=requests.get('https://api.twitter.com/2/tweets/search/stream',params=params,headers=header,stream=True)
     i=0
-    connection_established=1
-    for line in response.iter_lines():
-        global stop_stream
-        if global stop_stream==1:
-            return
-        else:
-            json_response = json.loads(line)  #json.loads----->Deserialize fp (a .read()-supporting text file or binary file containing a JSON document) to a Python object using this conversion table.ie json to python object 
-            i+=1
-            temp_ls.append(json_response)
-    return
+    if response.status_code!=200:
+        print(response.status_code)
+    else:
+        for line in response.iter_lines():
+            if line==b'':
+                pass
+            else:
+                json_response = json.loads(line)  #json.loads----->Deserialize fp (a .read()-supporting text file or binary file containing a JSON document) to a Python object using this conversion table.ie json to python object 
+                i+=1
+                temp_ls.append(json_response)
+                if i>batch_size:
+                    return temp_ls
+    return temp_ls
 
 

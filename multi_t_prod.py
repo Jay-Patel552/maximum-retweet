@@ -105,6 +105,8 @@ if __name__ == "__main__":
                     ls_vaccine.append(json.dumps(json_response,sort_keys=True))
                 if id_covid > int(sys.argv[1]) or id_covid_vaccine > int(sys.argv[1]):
                     stop_stream=1
+            print('sleeping')
+            time.sleep(5)
             #thread_stream.join()
         elif id_covid <= int(sys.argv[1]) and id_covid_vaccine > int(sys.argv[1]):
             stop_stream=0
@@ -112,33 +114,46 @@ if __name__ == "__main__":
             connection_established=0
             print("one more")
             time.sleep(5)
-            thread_stream=threading.Thread(target=twit_stream,args=(req_rules1,))
-            thread_stream.start()
+            thread_stream1=threading.Thread(target=twit_stream,args=(req_rules1,))
+            thread_stream1.start()
             while(connection_established==0):
                 time.sleep(0.1)
             for json_response in temp_ls:
-                id_covid+=1
-                json_response.update({'ID':id_covid})
-                ls_covid.append(json.dumps(json_response,sort_keys=True))
+                matching_rule=json_response.get("matching_rules")[0].get('tag')
+                if matching_rule=='covid':
+                    id_covid+=1
+                    json_response.update({'ID':id_covid})
+                    json_response.update({'MR':matching_rule})
+                    ls_covid.append(json.dumps(json_response,sort_keys=True))
                 if id_covid > int(sys.argv[1]):
                     stop_stream=1
+            print('sleeping')
+            time.sleep(5)
             #thread_stream.join()
         elif id_covid > int(sys.argv[1]) and id_covid_vaccine <= int(sys.argv[1]):
             stop_stream=0
             temp_ls.clear()
             connection_established=0
             print("two more")
-            time.sleep(5)
-            thread_stream=threading.Thread(target=twit_stream,args=(req_rules2,))
-            thread_stream.start()
+            thread_stream2=threading.Thread(target=twit_stream,args=(req_rules2,))
+            thread_stream2.start()
             while(connection_established==0):
                 time.sleep(0.1)
             for json_response in temp_ls:
-                id_covid_vaccine+=1
-                json_response.update({"ID":id_covid_vaccine})
-                ls_vaccine.append(json.dumps(json_response, sort_keys=True))
-                if id_covid_vaccine > int(sys.argv[1]):
-                    stop_stream=1
+                if json_response==None and stop_stream==0:
+                    pass
+                else:
+                    print(json_response)
+                    matching_rule=json_response.get("matching_rules")[0].get('tag')
+                    if matching_rule=='vaccine':
+                        id_covid_vaccine+=1
+                        json_response.update({"ID":id_covid_vaccine})
+                        json_response.update({'MR':matching_rule})
+                        ls_vaccine.append(json.dumps(json_response, sort_keys=True))
+                    if id_covid_vaccine > int(sys.argv[1]):
+                        stop_stream=1
+            print('sleeping')
+            time.sleep(5)
             #thread_stream.join()
         else:
             break

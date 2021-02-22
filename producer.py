@@ -20,30 +20,40 @@ if __name__=='__main__':
         temp_ls=[]
         if id_covid <= int(sys.argv[1]) and id_covid_vaccine<= int(sys.argv[1]):
             json_response_list=twit_stream(req_rules,temp_ls,batch_size)
-            for json_response in json_response_list:
-                matching_rule=json_response.get("matching_rules")[0].get('tag')
-                if matching_rule=='covid123':
+            if json_response_list==[]:
+                time.sleep(3)
+            else:            
+                for json_response in json_response_list:
+                    matching_rule=json_response.get("matching_rules")[0].get('tag')
+                    if matching_rule=='covid123':
+                        id_covid+=1
+                        json_response.update({'ID':id_covid})
+                        ls_covid.append(json.dumps(json_response,sort_keys=True))
+                    if matching_rule=='vaccine':
+                        id_covid_vaccine+=1
+                        json_response.update({'ID':id_covid_vaccine})
+                        ls_vaccine.append(json.dumps(json_response,sort_keys=True))
+        elif id_covid <= int(sys.argv[1]) and id_covid_vaccine > int(sys.argv[1]):
+            json_response_list=twit_stream(req_rules1,temp_ls,batch_size)
+            if json_response_list==[]:
+                time.sleep(3)
+            else:            
+                for json_response in json_response_list:
                     id_covid+=1
                     json_response.update({'ID':id_covid})
                     ls_covid.append(json.dumps(json_response,sort_keys=True))
-                if matching_rule=='vaccine':
-                    id_covid_vaccine+=1
-                    json_response.update({'ID':id_covid_vaccine})
-                    ls_vaccine.append(json.dumps(json_response,sort_keys=True))
-        elif id_covid <= int(sys.argv[1]) and id_covid_vaccine > int(sys.argv[1]):
-            json_response_list=twit_stream(req_rules1,temp_ls,batch_size)
-            for json_response in json_response_list:
-                id_covid+=1
-                json_response.update({'ID':id_covid})
-                ls_covid.append(json.dumps(json_response,sort_keys=True))
         elif id_covid > int(sys.argv[1]) and id_covid_vaccine <= int(sys.argv[1]):
             json_response_list=twit_stream(req_rules2,temp_ls,batch_size)
-            for json_response in json_response_list:
-                id_covid_vaccine+=1
-                json_response.update({"ID":id_covid_vaccine})
-                ls_vaccine.append(json.dumps(json_response, sort_keys=True))
+            if json_response_list==[]:
+                time.sleep(3)
+            else:
+                for json_response in json_response_list:
+                    id_covid_vaccine+=1
+                    json_response.update({"ID":id_covid_vaccine})
+                    ls_vaccine.append(json.dumps(json_response, sort_keys=True))
         else:
             break
-        time.sleep(0.34)
+        time.sleep(2)
     print(ls_covid)
+    print("")
     print(ls_vaccine)
