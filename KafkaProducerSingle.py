@@ -65,7 +65,4 @@ if __name__=='__main__':
                     #print(json_response)
         else:
             break
-        time.sleep(2)
-    #print(ls_covid)
-    #print("")
-    #print(ls_vaccine) 
+        time.sleep(2) 
