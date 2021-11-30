@@ -5,7 +5,7 @@ import json
 import os
 import time
 
-producer=KafkaProducer(bootstrap_servers='localhost:9092',value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer=KafkaProducer(bootstrap_servers='localhost:9092',linger_ms=10,value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 if __name__=='__main__':
     id_covid=0
@@ -18,7 +18,7 @@ if __name__=='__main__':
     ls_vaccine=[]
     while(1):
         temp_ls=[]
-        if id_covid <= int(sys.argv[1]) and id_covid_vaccine<= int(sys.argv[1]):
+        if id_covid <= (int(sys.argv[1])//2) and id_covid_vaccine<= (int(sys.argv[1])//2):
             json_response_list=twit_stream(req_rules,temp_ls,batch_size)
             if json_response_list==[]:
                 time.sleep(3)
@@ -30,12 +30,16 @@ if __name__=='__main__':
                         json_response.update({'ID':id_covid})
                         ls_covid.append(json.dumps(json_response,sort_keys=True))
                         producer.send('covid-tweets',json_response)
+                        #print(json_response)
+                        producer.flush()
                     if matching_rule=='vaccine':
                         id_covid_vaccine+=1
                         json_response.update({'ID':id_covid_vaccine})
                         ls_vaccine.append(json.dumps(json_response,sort_keys=True))
                         producer.send('vaccine-tweets',json_response)
-        elif id_covid <= int(sys.argv[1]) and id_covid_vaccine > int(sys.argv[1]):
+                        #print(json_response)
+                        producer.flush()
+        elif id_covid <= (int(sys.argv[1])//2) and id_covid_vaccine > (int(sys.argv[1])//2):
             json_response_list=twit_stream(req_rules1,temp_ls,batch_size)
             if json_response_list==[]:
                 time.sleep(3)
@@ -45,7 +49,9 @@ if __name__=='__main__':
                     json_response.update({'ID':id_covid})
                     ls_covid.append(json.dumps(json_response,sort_keys=True))
                     producer.send('covid-tweets',json_response)
-        elif id_covid > int(sys.argv[1]) and id_covid_vaccine <= int(sys.argv[1]):
+                    producer.flush()
+                    #print(json_response)
+        elif id_covid > (int(sys.argv[1])//2) and id_covid_vaccine <= (int(sys.argv[1])//2):
             json_response_list=twit_stream(req_rules2,temp_ls,batch_size)
             if json_response_list==[]:
                 time.sleep(3)
@@ -55,9 +61,11 @@ if __name__=='__main__':
                     json_response.update({"ID":id_covid_vaccine})
                     ls_vaccine.append(json.dumps(json_response, sort_keys=True))
                     producer.send('vaccine-tweets',json_response)
+                    producer.flush()
+                    #print(json_response)
         else:
             break
         time.sleep(2)
-    print(ls_covid)
-    print("")
-    print(ls_vaccine)   
+    #print(ls_covid)
+    #print("")
+    #print(ls_vaccine) 
